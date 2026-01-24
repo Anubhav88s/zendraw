@@ -105,10 +105,10 @@ app.post("/room", middleware, async (req, res) => {
 
 //to get all previous chat messages 
 // ***** middleware is added extra so send it in header *****
-app.get("/chats/:roomId" , middleware, async (req , res) =>{
-
+app.get("/chats/:roomId" , async (req , res) =>{
+    try {
     const roomId = Number(req.params.roomId);
-    const message = await prismaClient.chat.findMany({
+    const messages = await prismaClient.chat.findMany({
         where:{
             roomId: roomId 
         },
@@ -118,7 +118,25 @@ app.get("/chats/:roomId" , middleware, async (req , res) =>{
         take: 50
     });
     res.json({
-        message
+        messages
+    })
+    } catch (error) {
+        res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+})
+
+//to get room details
+app.get("/room/:slug" , async (req , res) =>{
+    const slug  = req.params.slug;
+    const room = await prismaClient.room.findFirst({
+        where:{
+            slug
+        }
+    })
+    res.json({
+        room
     })
 })
 

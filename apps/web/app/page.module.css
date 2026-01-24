@@ -1,3 +1,4 @@
+/* 
 .page {
   --gray-rgb: 0, 0, 0;
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
@@ -127,7 +128,7 @@ button.secondary {
 }
 
 /* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
+/* @media (hover: hover) and (pointer: fine) {
   a.primary:hover {
     background: var(--button-primary-hover);
     border-color: transparent;
@@ -183,4 +184,4 @@ button.secondary {
   .logo {
     filter: invert();
   }
-}
+}  */
