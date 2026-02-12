@@ -1,0 +1,9 @@
+export { LiveCanvasDemo } from "./LiveCanvasDemo";
+export { FloatingShapes } from "./FloatingShapes";
+export { ToolShowcase } from "./ToolShowcase";
+export { Header } from "./Header";
+export { Footer } from "./Footer";
+export { HeroSection } from "./HeroSection";
+export { FeaturesSection } from "./FeaturesSection";
+export { ToolsSection } from "./ToolsSection";
+export { CTASection } from "./CTASection";
