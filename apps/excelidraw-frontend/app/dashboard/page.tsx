@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import axios from "axios";
+import Image from "next/image";
 import {
   Pencil,
   Plus,
@@ -164,7 +165,7 @@ export default function DashboardPage() {
   // Logout
   const handleLogout = () => {
     logout();
-    router.push("/signin");
+    router.push("/");
   };
 
   const formatDate = (dateStr: string) => {
@@ -191,9 +192,7 @@ export default function DashboardPage() {
           <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-2.5">
-              <div className="bg-gradient-to-br from-violet-500 to-blue-600 p-2 rounded-xl shadow-lg shadow-violet-500/20">
-                <Pencil className="h-4 w-4 text-white" />
-              </div>
+              <Image src="/logo.png" alt="Zendraw Logo" width={48} height={48} className="rounded-xl shadow-lg shadow-violet-500/20" />
               <span className="text-lg font-bold tracking-tight">Zendraw</span>
             </div>
 

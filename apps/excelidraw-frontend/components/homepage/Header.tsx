@@ -1,4 +1,4 @@
-import { Pencil } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@repo/ui/button";
 
@@ -11,9 +11,7 @@ export function Header() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="absolute inset-0 bg-violet-500 blur-lg opacity-50" />
-                <div className="relative bg-gradient-to-br from-violet-500 to-blue-600 p-2 rounded-xl">
-                  <Pencil className="h-5 w-5 text-white" />
-                </div>
+                <Image src="/logo.png" alt="Zendraw Logo" width={56} height={56} className="relative rounded-xl" />
               </div>
               <span className="text-xl font-bold tracking-tight">Zendraw</span>
             </div>

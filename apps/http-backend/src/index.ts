@@ -6,13 +6,16 @@ import { middleware } from "./middleware";
 import { CreateUserSchema, SigninSchema, CreateRoomSchema } from "@repo/common/types";
 import { prismaClient } from "@repo/db/client";
 import cors from "cors";
+import { authLimiter } from "./rateLimit";
+import helmet from "helmet";
 
-const app = express();
+const app = express();  
 app.use(express.json());
 app.use(cors());
- 
+app.use(helmet()); 
+
 //to sign up 
-app.post("/signup", async(req, res) => {
+app.post("/signup",authLimiter, async(req, res) => {
 
     const parsedData = CreateUserSchema.safeParse(req.body);
     if (!parsedData.success) {
@@ -47,7 +50,7 @@ app.post("/signup", async(req, res) => {
 })
 
 //to sign in 
-app.post("/signin", async (req, res) => {
+app.post("/signin",authLimiter, async (req, res) => {
     const parsedData = SigninSchema.safeParse(req.body);
     if (!parsedData.success) {
         res.json({
@@ -161,7 +164,7 @@ app.get("/room/:slug" , async (req , res) =>{
 })
 
 // Verify room password
-app.post("/room/verify-password", async (req, res) => {
+app.post("/room/verify-password",authLimiter, async (req, res) => {
     const { slug, password } = req.body;
     if (!slug || !password) {
         res.status(400).json({ message: "Slug and password are required" });

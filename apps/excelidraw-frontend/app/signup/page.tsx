@@ -4,7 +4,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { Button } from "@repo/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Pencil, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Mail, Lock, User, ArrowRight } from "lucide-react";
+import Image from "next/image";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 export default function Signup() {
@@ -48,9 +49,7 @@ export default function Signup() {
 
         {/* Logo — top left */}
         <div className="absolute top-8 left-8 flex items-center gap-2.5 z-10">
-          <div className="bg-gradient-to-br from-violet-500 to-blue-600 p-2 rounded-xl shadow-lg shadow-violet-500/20">
-            <Pencil className="h-4 w-4 text-white" />
-          </div>
+          <Image src="/logo.png" alt="Zendraw Logo" width={48} height={48} className="rounded-xl shadow-lg shadow-violet-500/20" />
           <span className="text-lg font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent tracking-tight">
             Zendraw
           </span>

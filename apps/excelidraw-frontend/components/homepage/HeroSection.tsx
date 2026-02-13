@@ -46,33 +46,9 @@ export function HeroSection() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link
-                href="https://github.com/Anubhav88s/Almost-Room-Chat"
-                target="_blank"
-              >
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-14 px-8 rounded-full border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white transition-all"
-                >
-                  <Github className="mr-2 h-5 w-5" />
-                  View Source
-                </Button>
-              </Link>
+
             </div>
 
-            {/* Stats */}
-            <div className="mt-12 flex items-center gap-8 text-zinc-500 text-sm">
-              <div className="flex items-center gap-2">
-                <Users2 className="w-4 h-4" />
-                <span>10k+ users</span>
-              </div>
-              <div className="w-1 h-1 rounded-full bg-zinc-700" />
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4" />
-                <span>50k+ boards</span>
-              </div>
-            </div>
           </div>
 
           {/* Right side - Live Canvas Demo */}

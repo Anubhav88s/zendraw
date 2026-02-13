@@ -1,135 +1,288 @@
-# Turborepo starter
+<p align="center">
+  <img src="apps/excelidraw-frontend/public/logo.png" alt="Zendraw Logo" width="80" />
+</p>
 
-This Turborepo starter is maintained by the Turborepo core team.
+<h1 align="center">Zendraw</h1>
 
-## Using this example
+<p align="center">
+  <b>Collaborative whiteboarding made effortless.</b><br/>
+  Draw, brainstorm, and create together in real-time — completely free.
+</p>
 
-Run the following command:
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/Express-4-000000?logo=express" alt="Express" />
+  <img src="https://img.shields.io/badge/WebSocket-Real--time-blue?logo=websocket" alt="WebSocket" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Database-336791?logo=postgresql" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma" alt="Prisma" />
+  <img src="https://img.shields.io/badge/TypeScript-Strict-3178C6?logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Turborepo-Monorepo-EF4444?logo=turborepo" alt="Turborepo" />
+</p>
 
-```sh
-npx create-turbo@latest
+---
+
+## 📸 Screenshots
+
+### Landing Page
+![Landing Page](screenshots/landing.png)
+
+### Sign Up
+![Sign Up](screenshots/signup.png)
+
+### Sign In
+![Sign In](screenshots/signin.png)
+
+### Dashboard — Room Management
+![Dashboard](screenshots/dashboard.png)
+
+### Canvas — Drawing Tools
+![Canvas](screenshots/canvas.png)
+
+---
+
+## ✨ Features
+
+### 🎨 Drawing Tools
+- **Pencil** — Freehand drawing with smooth strokes
+- **Rectangle** — Draw rectangles with customizable stroke colors
+- **Diamond** — Create diamond/rhombus shapes
+- **Circle** — Draw perfect circles and ellipses
+- **Arrow** — Draw directional arrows for flowcharts and diagrams
+- **Line** — Straight line tool for precise connections
+- **Text** — Add text annotations anywhere on the canvas
+- **Eraser** — Remove individual shapes or strokes
+
+### 🎯 Customization
+- **Background Colors** — Choose from multiple canvas background colors (black, dark gray, white, violet, blue, green)
+- **Stroke Colors** — 8 vibrant stroke color options (white, black, red, orange, green, teal, purple)
+- **Line Thickness** — Three thickness levels: Thin, Medium, and Thick
+- **Infinite Canvas** — Pan freely across an unlimited workspace
+
+### 👥 Real-time Collaboration
+- **Live Multi-user Drawing** — See teammates draw in real-time via WebSockets
+- **Room-based Sessions** — Create or join rooms using unique slugs
+- **Shape Sync** — All shapes are instantly broadcasted to all room participants
+- **Shape Deletion Sync** — Deleting a shape removes it for everyone in real-time
+- **Persistent Canvas** — All drawings are saved to the database and restored when you rejoin
+
+### 📤 Export Options
+- **Export as PDF** — Download your whiteboard as a PDF document
+- **Export as PNG** — Save a high-quality PNG image of your canvas
+
+### 🏠 Dashboard
+- **Room Management** — View all your created rooms in one place
+- **Create Room** — Instantly create new whiteboard rooms with optional password protection
+- **Join Room** — Join any room by entering its slug
+- **Delete Room** — Remove rooms you've created (admin only)
+- **Room Cards** — See room name, creation date, and quick open action
+
+---
+
+## 🔒 Security Features
+
+| Feature | Description |
+|---------|-------------|
+| **Password Hashing** | All user passwords are hashed using `bcrypt` with 10 salt rounds before storage |
+| **JWT Authentication** | Token-based authentication using `jsonwebtoken` for stateless session management |
+| **Rate Limiting** | Auth routes (`/signin`, `/signup`, `/room/verify-password`) are rate-limited to **10 requests per 15 minutes** per IP using `express-rate-limit` |
+| **Helmet** | HTTP security headers (XSS protection, content sniffing prevention, clickjacking defense, HSTS) via `helmet` middleware |
+| **Password-Protected Rooms** | Room creators can set a password; joiners must verify it before accessing the canvas |
+| **WebSocket Token Verification** | WebSocket connections require a valid JWT token passed as a query parameter; unauthorized connections are immediately closed |
+| **Input Validation** | All API inputs are validated using `Zod` schemas (`CreateUserSchema`, `SigninSchema`, `CreateRoomSchema`) before processing |
+| **CORS** | Cross-Origin Resource Sharing is configured to control which origins can access the API |
+
+---
+
+## 🏗️ Tech Stack
+
+### Frontend
+| Technology | Purpose |
+|-----------|---------|
+| **Next.js 15** | React framework with App Router, SSR, and file-based routing |
+| **TypeScript** | Type-safe development across the entire codebase |
+| **Tailwind CSS** | Utility-first CSS framework for rapid UI development |
+| **Lucide React** | Beautiful, consistent icon library |
+| **HTML5 Canvas API** | Core drawing engine for the whiteboard |
+
+### Backend
+| Technology | Purpose |
+|-----------|---------|
+| **Express.js** | RESTful HTTP API server for auth, rooms, and data |
+| **WebSocket (ws)** | Real-time bidirectional communication for live collaboration |
+| **Prisma** | Type-safe ORM for database queries and migrations |
+| **PostgreSQL** | Relational database for persistent storage |
+| **bcrypt** | Password hashing with salt rounds |
+| **JWT** | Stateless authentication tokens |
+| **Helmet** | HTTP security headers middleware |
+| **express-rate-limit** | API rate limiting for brute-force protection |
+
+### Infrastructure
+| Technology | Purpose |
+|-----------|---------|
+| **Turborepo** | High-performance monorepo build system with caching |
+| **pnpm** | Fast, disk-efficient package manager with workspace support |
+| **Zod** | Runtime schema validation for API inputs |
+
+---
+
+## 📁 Project Structure
+
+```
+draw-app/
+├── apps/
+│   ├── excelidraw-frontend/     # Next.js frontend application
+│   │   ├── app/                 # App Router pages (signin, signup, dashboard, canvas)
+│   │   ├── components/          # Reusable UI components
+│   │   │   ├── homepage/        # Landing page components (Header, Hero, Footer, etc.)
+│   │   │   ├── Canvas.tsx       # Main canvas component with toolbar
+│   │   │   └── RoomCanvas.tsx   # Room-aware canvas wrapper
+│   │   └── draw/                # Canvas drawing engine (Game.ts)
+│   │
+│   ├── http-backend/            # Express REST API server (port 3001)
+│   │   └── src/
+│   │       ├── index.ts         # API routes (auth, rooms, chats)
+│   │       ├── middleware.ts    # JWT auth middleware
+│   │       └── rateLimit.ts     # Rate limiter configuration
+│   │
+│   └── ws-backend/              # WebSocket server (port 8080)
+│       └── src/
+│           └── index.ts         # Real-time message handling
+│
+├── packages/
+│   ├── db/                      # Prisma client & schema
+│   │   └── prisma/
+│   │       └── schema.prisma    # Database models (User, Room, Chat)
+│   ├── common/                  # Shared Zod validation schemas
+│   ├── backend-common/          # Shared backend config (JWT_SECRET)
+│   ├── ui/                      # Shared UI component library
+│   ├── eslint-config/           # Shared ESLint configuration
+│   └── typescript-config/       # Shared TypeScript configuration
+│
+├── turbo.json                   # Turborepo pipeline configuration
+├── pnpm-workspace.yaml          # pnpm workspace definition
+└── package.json                 # Root scripts & dependencies
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+## 🗄️ Database Schema
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+┌─────────────┐       ┌─────────────┐       ┌─────────────┐
+│    User      │       │    Room      │       │    Chat      │
+├─────────────┤       ├─────────────┤       ├─────────────┤
+│ id (UUID)   │──┐    │ id (Auto)   │──┐    │ id (Auto)   │
+│ email       │  │    │ slug        │  │    │ roomId      │──→ Room.id
+│ password    │  │    │ createdAt   │  │    │ message     │
+│ name        │  ├──→ │ adminId     │  ├──→ │ userId      │──→ User.id
+│ photo?      │  │    │ password?   │  │    │ shapeId?    │
+│             │  │    │             │  │    │             │
+└─────────────┘  │    └─────────────┘  │    └─────────────┘
+                 │                      │
+                 └── One-to-Many ───────┘
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+## 🚀 Getting Started
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+### Prerequisites
 
-### Develop
+- **Node.js** ≥ 18
+- **pnpm** ≥ 9.0.0
+- **PostgreSQL** database
 
-To develop all apps and packages, run the following command:
+### Installation
 
-```
-cd my-turborepo
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Anubhav88s/wb.git
+   cd wb
+   ```
 
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+3. **Set up environment variables**
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+   Create a `.env` file in `packages/db/` with:
+   ```env
+   DATABASE_URL="postgresql://user:password@localhost:5432/zendraw"
+   ```
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+   Create a `.env` file in `apps/http-backend/` with:
+   ```env
+   JWT_SECRET="your-secret-key"
+   ```
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+4. **Set up the database**
+   ```bash
+   cd packages/db
+   npx prisma migrate dev
+   npx prisma generate
+   ```
 
-### Remote Caching
+5. **Run the development servers**
+   ```bash
+   # From the root directory
+   pnpm run dev
+   ```
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+   This starts all services simultaneously via Turborepo:
+   | Service | Port | Description |
+   |---------|------|-------------|
+   | Frontend | `3000` | Next.js application |
+   | HTTP API | `3001` | Express REST server |
+   | WebSocket | `8080` | Real-time collaboration server |
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+---
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+## 📡 API Endpoints
 
-```
-cd my-turborepo
+### Authentication
+| Method | Endpoint | Auth | Rate Limited | Description |
+|--------|----------|:----:|:------------:|-------------|
+| `POST` | `/signup` | ❌ | ✅ | Create a new account |
+| `POST` | `/signin` | ❌ | ✅ | Sign in and receive JWT |
 
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+### Rooms
+| Method | Endpoint | Auth | Rate Limited | Description |
+|--------|----------|:----:|:------------:|-------------|
+| `POST` | `/room` | ✅ | ❌ | Create a new room |
+| `GET` | `/room/:slug` | ❌ | ❌ | Get room details |
+| `GET` | `/rooms` | ✅ | ❌ | List all your rooms |
+| `DELETE` | `/room/:slug` | ✅ | ❌ | Delete a room (admin only) |
+| `POST` | `/room/verify-password` | ❌ | ✅ | Verify room password |
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+### Chats / Shapes
+| Method | Endpoint | Auth | Rate Limited | Description |
+|--------|----------|:----:|:------------:|-------------|
+| `GET` | `/chats/:roomId` | ❌ | ❌ | Get all shapes in a room |
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+### WebSocket Events
+| Event | Direction | Description |
+|-------|-----------|-------------|
+| `join_room` | Client → Server | Join a room for real-time updates |
+| `leave_room` | Client → Server | Leave a room |
+| `chat` | Bidirectional | Send/receive shape data |
+| `delete_shape` | Bidirectional | Send/receive shape deletions |
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+---
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+## 👤 Author
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
+**Anubhav Raj Singh**
 
-## Useful Links
+- 📧 Email: [anubhavrajsinghu@gmail.com](mailto:anubhavrajsinghu@gmail.com)
+- 🔗 LinkedIn: [Anubhav Raj Singh](https://www.linkedin.com/in/anubhav-raj-singh-88a03b2b5/)
+- 🐙 GitHub: [@Anubhav88s](https://github.com/Anubhav88s)
 
-Learn more about the power of Turborepo:
+---
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+## 📄 License
+
+© 2026 Zendraw. All rights reserved.
+
+This project is proprietary software. No part of this codebase may be reproduced, distributed, or used without explicit written permission from the author.
