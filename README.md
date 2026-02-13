@@ -285,4 +285,3 @@ draw-app/
 
 © 2026 Zendraw. All rights reserved.
 
-This project is proprietary software. No part of this codebase may be reproduced, distributed, or used without explicit written permission from the author.
