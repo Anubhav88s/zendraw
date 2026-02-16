@@ -146,9 +146,12 @@ draw-app/
 │   │
 │   ├── http-backend/            # Express REST API server (port 3001)
 │   │   └── src/
-│   │       ├── index.ts         # API routes (auth, rooms, chats)
+│   │       ├── index.ts         # Server setup, middleware & route mounting
 │   │       ├── middleware.ts    # JWT auth middleware
-│   │       └── rateLimit.ts     # Rate limiter configuration
+│   │       ├── rateLimit.ts     # Rate limiter configuration
+│   │       └── routes/
+│   │           ├── auth.ts      # Auth routes (signup, signin)
+│   │           └── room.ts      # Room & chat routes
 │   │
 │   └── ws-backend/              # WebSocket server (port 8080)
 │       └── src/
@@ -266,6 +269,11 @@ draw-app/
 | Method | Endpoint | Auth | Rate Limited | Description |
 |--------|----------|:----:|:------------:|-------------|
 | `GET` | `/chats/:roomId` | ❌ | ❌ | Get all shapes in a room |
+
+### Health Check
+| Method | Endpoint | Auth | Rate Limited | Description |
+|--------|----------|:----:|:------------:|-------------|
+| `GET` | `/health` | ❌ | ❌ | Health check for deployment monitoring |
 
 ### WebSocket Events
 | Event | Direction | Description |
