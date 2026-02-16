@@ -129,7 +129,8 @@ export default function DashboardPage() {
             return;
           }
           // Pass verified password so RoomCanvas skips the second prompt
-          router.push(`/canvas/${joinSlug.trim()}?pwd=${encodeURIComponent(joinPassword)}`);
+          sessionStorage.setItem("room_pwd", joinPassword);
+          router.push(`/canvas/${joinSlug.trim()}`);
         } else {
           router.push(`/canvas/${joinSlug.trim()}`);
         }
