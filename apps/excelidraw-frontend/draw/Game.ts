@@ -77,6 +77,19 @@ export class Game {
     private lineWidth : number = 2;
 
     private socket : WebSocket;
+
+    //for paning and moving 
+    private panX: number = 0;
+    private panY: number = 0;
+    private isPanning: boolean = false;
+    private panStartX: number = 0;
+    private panStartY: number = 0;
+
+    //for zoom
+    private scale: number = 1;
+    private MIN_SCALE: number = 0.1;
+    private MAX_SCALE: number = 5;
+    private onScaleChange?: (scale: number) => void;
     
 
     constructor(canvas : HTMLCanvasElement , roomId : string , socket : WebSocket){
@@ -98,9 +111,11 @@ export class Game {
         this.canvas.removeEventListener("mouseup", this.mouseUpHandler)
 
         this.canvas.removeEventListener("mousemove", this.mouseMoveHandler)
+
+        this.canvas.removeEventListener("wheel", this.wheelHandler);
     }
 
-    setTool(tool: "circle" | "pencil" | "rect" | "line" | "arrow" | "diamond" | "text" | "eraser" | "selection") {
+    setTool(tool: "circle" | "pencil" | "rect" | "line" | "arrow" | "diamond" | "text" | "eraser" | "selection" | "pan") {
         this.selectedTool = tool;
     }
 
@@ -141,6 +156,11 @@ export class Game {
         this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
      this.ctx.fillStyle = this.bgColor;
      this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+
+     //apply pan transformation
+     this.ctx.save(); // save the current state of the canvas
+     this.ctx.translate(this.panX, this.panY); // apply pan transformation
+     this.ctx.scale(this.scale, this.scale); // apply zoom transformation
 
      this.existingShapes.map((shape)=>{
         const shapeColor = shape.color || "#ffffff";
@@ -214,16 +234,33 @@ export class Game {
             this.ctx.fillText(shape.text, shape.x, shape.y);
 
         }
-     })
+     }) ;
+
+     this.ctx.restore(); // restore the canvas state
     }
 
     mouseDownHandler = (e: MouseEvent)=>{
+
+        //for paning 
+        if(this.selectedTool === "pan"){
+            this.isPanning = true ;
+            this.panStartX = e.clientX - this.panX;
+            this.panStartY = e.clientY - this.panY;
+            this.canvas.style.cursor = "grabbing";
+            return;
+        }
+
+
         this.clicked = true;
-        this.startX = e.clientX;
-        this.startY = e.clientY;
+        const world = this.screenToWorld(e.clientX,e.clientY);
+        // this.startX = e.clientX;
+        // this.startY = e.clientY;
+        this.startX = world.x;
+        this.startY = world.y;
 
         if (this.selectedTool === "pencil") {
-            this.currentPencilPoints = [ { x: e.clientX, y: e.clientY } ];
+            // this.currentPencilPoints = [ { x: e.clientX, y: e.clientY } ];
+            this.currentPencilPoints = [ { x: world.x, y: world.y } ];
             
         }else if (this.selectedTool === "text") {
             // Call the new helper method 
@@ -231,8 +268,11 @@ export class Game {
              return;
         }else if (this.selectedTool === "eraser") {
             this.clicked = false;
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
+            // const mouseX = e.clientX;
+            // const mouseY = e.clientY;
+            const mouseWorld = this.screenToWorld(e.clientX,e.clientY);
+            const mouseX = mouseWorld.x;
+            const mouseY = mouseWorld.y;
 
             // Check if any shape was clicked
             for (let i = this.existingShapes.length - 1; i >= 0; i--) {
@@ -263,9 +303,21 @@ export class Game {
     }
 
     mouseUpHandler= (e : MouseEvent)=>{
+
+        //for paning 
+        if(this.isPanning ){
+            this.isPanning = false;
+            this.canvas.style.cursor = "default";
+            return;
+        }
+
+
         this.clicked = false;
-        const width = e.clientX - this.startX;
-        const height = e.clientY - this.startY;
+        const world = this.screenToWorld(e.clientX,e.clientY);
+        const width = world.x - this.startX;
+        const height = world.y - this.startY;
+        // const width = e.clientX - this.startX;
+        // const height = e.clientY - this.startY;
 
         const selectedTool = this.selectedTool;
         let shape : Shapes | null = null;
@@ -302,8 +354,8 @@ export class Game {
                 type : "line",
                 startX : this.startX,
                 startY : this.startY,
-                endX : e.clientX,
-                endY : e.clientY,
+                endX : world.x,
+                endY : world.y,
                 id : Date.now().toString(36) + Math.random().toString(36).substr(2),
                 color: this.strokeColor,
                 lineWidth: this.lineWidth
@@ -313,8 +365,8 @@ export class Game {
                 type : "arrow",
                 startX : this.startX,
                 startY : this.startY,
-                endX : e.clientX,
-                endY : e.clientY,
+                endX : world.x,
+                endY : world.y,
                 id : Date.now().toString(36) + Math.random().toString(36).substr(2),
                 color: this.strokeColor,
                 lineWidth: this.lineWidth
@@ -360,10 +412,27 @@ export class Game {
     }
 
     mouseMoveHandler = (e : MouseEvent)=>{
+
+        //for paning 
+        if (this.isPanning) {
+            this.panX = e.clientX - this.panStartX;
+            this.panY = e.clientY - this.panStartY;
+            this.clearCanvas();
+            return;
+        }
+
+
+
         if(this.clicked){
-            const width = e.clientX - this.startX;
-            const height = e.clientY - this.startY;
+            const world = this.screenToWorld(e.clientX, e.clientY);
+            const width = world.x - this.startX;
+            const height = world.y - this.startY;
+            // const width = e.clientX - this.startX;
+            // const height = e.clientY - this.startY;
            this.clearCanvas();
+           this.ctx.save();
+           this.ctx.translate(this.panX, this.panY);
+           this.ctx.scale(this.scale, this.scale);
             this.ctx.strokeStyle = this.strokeColor;
             this.ctx.lineWidth = this.lineWidth;
 
@@ -385,28 +454,30 @@ export class Game {
             }else if(selectedTool == "line"){
                 this.ctx.beginPath(); 
                 this.ctx.moveTo(this.startX,this.startY); // Set a start-point
-                this.ctx.lineTo(e.clientX,e.clientY); // Set an end-point
+                this.ctx.lineTo(world.x,world.y); // Set an end-point
                 this.ctx.stroke(); // Draw the line
                 this.ctx.closePath(); 
 
             }else if(selectedTool == "arrow"){
                 const headLength = 10;
-                const dx = e.clientX - this.startX;
-                const dy = e.clientY - this.startY;
+                // const dx = e.clientX - this.startX;
+                // const dy = e.clientY - this.startY;
+                const dx = world.x - this.startX;
+                const dy = world.y - this.startY;
                 const angle = Math.atan2(dy, dx);
     
                 this.ctx.beginPath();
                 this.ctx.moveTo(this.startX, this.startY);
-                this.ctx.lineTo(e.clientX, e.clientY);
+                this.ctx.lineTo(world.x, world.y);
                 
                 // Draw arrow head
                 this.ctx.lineTo(
-                    e.clientX - headLength * Math.cos(angle - Math.PI / 6), //first line of arrow head
-                    e.clientY - headLength * Math.sin(angle - Math.PI / 6));
-                this.ctx.moveTo(e.clientX, e.clientY); //move to the end point of the arrow to draw the second line of arrow head
+                    world.x - headLength * Math.cos(angle - Math.PI / 6), //first line of arrow head
+                    world.y - headLength * Math.sin(angle - Math.PI / 6));
+                this.ctx.moveTo(world.x, world.y); //move to the end point of the arrow to draw the second line of arrow head
                 this.ctx.lineTo(
-                    e.clientX - headLength * Math.cos(angle + Math.PI / 6), //second line of arrow head
-                    e.clientY - headLength * Math.sin(angle + Math.PI / 6));
+                    world.x - headLength * Math.cos(angle + Math.PI / 6), //second line of arrow head
+                    world.y - headLength * Math.sin(angle + Math.PI / 6));
                 this.ctx.stroke();
                 this.ctx.closePath();
                 
@@ -422,7 +493,7 @@ export class Game {
                 this.ctx.closePath();
                 this.ctx.stroke();
             } else if (selectedTool === "pencil") {
-                this.currentPencilPoints.push({ x: e.clientX, y: e.clientY });
+                this.currentPencilPoints.push({ x: world.x, y: world.y });
                 this.ctx.beginPath();
                 this.ctx.moveTo(this.currentPencilPoints[0].x, this.currentPencilPoints[0].y);
                 this.currentPencilPoints.forEach(point => {
@@ -432,6 +503,7 @@ export class Game {
                 this.ctx.closePath();
             }
             
+            this.ctx.restore();
         }
     }
 
@@ -439,6 +511,7 @@ export class Game {
         this.canvas.addEventListener("mousedown", this.mouseDownHandler);
         this.canvas.addEventListener("mouseup", this.mouseUpHandler);
         this.canvas.addEventListener("mousemove", this.mouseMoveHandler);
+        this.canvas.addEventListener("wheel", this.wheelHandler, { passive: false });
     }
 
     createInput(x: number, y: number) {
@@ -467,10 +540,11 @@ export class Game {
         const handleBlur = () => {
             const text = input.value;
             if (text.trim()) {
+                const worldPos = this.screenToWorld(x, y);
                 const shape: Shapes = {
                     type: "text",
-                    x: x,
-                    y: y,
+                    x: worldPos.x,  // was: x
+                    y: worldPos.y,  // was: y
                     text: text,
                     id : Date.now().toString(36) + Math.random().toString(36).substr(2),
                     color: this.strokeColor,
@@ -571,4 +645,83 @@ export class Game {
         return Math.sqrt(dx * dx + dy * dy);
       }
 
+    private screenToWorld(screenX: number, screenY: number) {
+        return {
+            x: (screenX - this.panX) / this.scale,
+            y: (screenY - this.panY) / this.scale
+        };
+    }
+
+    wheelHandler = (e: WheelEvent) => {
+    e.preventDefault();
+
+        if (e.ctrlKey) {
+            // Zoom — zoom towards mouse cursor position
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            // Calculate world position of mouse BEFORE zoom
+            const worldBeforeZoom = this.screenToWorld(mouseX, mouseY);
+
+            // Apply zoom
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;  // scroll down = zoom out, scroll up = zoom in
+            this.scale *= zoomFactor;
+            this.scale = Math.min(Math.max(this.scale, this.MIN_SCALE), this.MAX_SCALE);
+
+            // Calculate world position of mouse AFTER zoom
+            const worldAfterZoom = this.screenToWorld(mouseX, mouseY);
+
+            // Adjust pan so the point under the cursor stays fixed
+            this.panX += (worldAfterZoom.x - worldBeforeZoom.x) * this.scale;
+            this.panY += (worldAfterZoom.y - worldBeforeZoom.y) * this.scale;
+        } else {
+            // Pan — normal scroll
+            this.panX -= e.deltaX;
+            this.panY -= e.deltaY;
+        }
+
+        this.clearCanvas();
+        this.onScaleChange?.(this.scale);
+    }
+    zoomIn() {
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        const worldBefore = this.screenToWorld(centerX, centerY);
+        this.scale = Math.min(this.scale * 1.1, this.MAX_SCALE);
+        const worldAfter = this.screenToWorld(centerX, centerY);
+        this.panX += (worldAfter.x - worldBefore.x) * this.scale;
+        this.panY += (worldAfter.y - worldBefore.y) * this.scale;
+        this.clearCanvas();
+        this.onScaleChange?.(this.scale);
+    }
+
+    zoomOut() {
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        const worldBefore = this.screenToWorld(centerX, centerY);
+        this.scale = Math.max(this.scale * 0.9, this.MIN_SCALE);
+        const worldAfter = this.screenToWorld(centerX, centerY);
+        this.panX += (worldAfter.x - worldBefore.x) * this.scale;
+        this.panY += (worldAfter.y - worldBefore.y) * this.scale;
+        this.clearCanvas();
+        this.onScaleChange?.(this.scale);
+    }
+
+    resetZoom() {
+        this.scale = 1;
+        this.panX = 0;
+        this.panY = 0;
+        this.clearCanvas();
+        this.onScaleChange?.(this.scale);
+    }
+
+    setScaleChangeCallback(cb: (scale: number) => void) {
+        this.onScaleChange = cb;
+    }
+
+    getScale(): number {
+        return this.scale;
+    }
 }
+
+

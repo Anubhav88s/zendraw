@@ -4,6 +4,7 @@ import { Tool } from "@/draw/tools";
 import { KeyBoardShortcuts } from "@/hooks/KeyBoardShortcuts";
 import { TopBar } from "./TopBar";
 import { LeftSidebar } from "./LeftSidebar";
+import { ZoomControls } from "./ZoomControls";
 
 export default function Canvas({
   roomId,
@@ -18,6 +19,7 @@ export default function Canvas({
   const [bgColor, setBgColor] = useState("#121212");
   const [strokeColor, setStrokeColor] = useState("#ffffff");
   const [lineWidth, setLineWidth] = useState(2);
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     game?.setTool(selectedTool);
@@ -38,6 +40,7 @@ export default function Canvas({
   useEffect(() => {
     if (canvasRef.current) {
       const g = new Game(canvasRef.current, roomId, socket);
+      g.setScaleChangeCallback(setScale);
       setGame(g);
 
       return () => {
@@ -46,7 +49,7 @@ export default function Canvas({
     }
   }, [canvasRef]);
 
-  KeyBoardShortcuts(setSelectedTool);
+  KeyBoardShortcuts(setSelectedTool, game);
 
   return (
     <div className="w-full h-full overflow-hidden">
@@ -65,6 +68,8 @@ export default function Canvas({
         setLineWidth={setLineWidth}
         canvasRef={canvasRef}
       />
+      <ZoomControls game={game} scale={scale} />
     </div>
   );
 }
+

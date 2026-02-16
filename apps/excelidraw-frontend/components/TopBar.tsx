@@ -8,6 +8,7 @@ import {
   Type,
   Eraser,
   MousePointer2,
+  Hand,
 } from "lucide-react";
 import { IconButton } from "./IconButton";
 import { Tool } from "@/draw/tools";
@@ -78,6 +79,12 @@ export function TopBar({
           onClick={() => setSelectedTool("eraser")}
           activated={selectedTool === "eraser"}
           shortcut="9"
+        />
+        <IconButton
+          icon={<Hand />}
+          onClick={() => setSelectedTool("pan")}
+          activated={selectedTool === "pan"}
+          shortcut="0"
         />
       </div>
     </div>

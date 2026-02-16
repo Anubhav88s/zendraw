@@ -56,7 +56,13 @@
 - **Background Colors** — Choose from multiple canvas background colors (black, dark gray, white, violet, blue, green)
 - **Stroke Colors** — 8 vibrant stroke color options (white, black, red, orange, green, teal, purple)
 - **Line Thickness** — Three thickness levels: Thin, Medium, and Thick
-- **Infinite Canvas** — Pan freely across an unlimited workspace
+
+### 🔍 Pan & Zoom
+- **Zoom In/Out** — Scroll with mouse wheel to zoom in and out smoothly
+- **Keyboard Zoom** — Use `Ctrl +` / `Ctrl -` to zoom in and out
+- **Reset Zoom** — Press `Ctrl 0` to reset to 100% zoom level
+- **Zoom Indicator** — Live zoom percentage display on the canvas
+- **Infinite Canvas** — Pan freely across an unlimited workspace by clicking and dragging
 
 ### 👥 Real-time Collaboration
 - **Live Multi-user Drawing** — See teammates draw in real-time via WebSockets
