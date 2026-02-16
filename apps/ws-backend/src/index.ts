@@ -3,8 +3,24 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from '@repo/backend-common/config';
 import { prismaClient } from "@repo/db/client";
 
+// just to start the sever as it is hosted on render 
+import http from "http";
+
 const PORT = Number(process.env.PORT) || 8080;
-const wss = new WebSocketServer({ port: PORT });
+// const wss = new WebSocketServer({ port: PORT });
+
+
+//just to start the sever as it is hosted on render 
+const server = http.createServer((req, res) => {
+    if (req.url === "/health") {
+        res.writeHead(200);
+        res.end("ok");
+        return;
+    }
+    res.writeHead(404);
+    res.end("not found");
+});
+const wss = new WebSocketServer({ server });
 
 //creating a variable to store user data 
 
@@ -139,3 +155,9 @@ wss.on('connection', function connection(ws, request) {
   });
 
 });
+
+// just to start the sever as it is hosted on render 
+server.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+});
+
