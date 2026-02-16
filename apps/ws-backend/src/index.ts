@@ -12,6 +12,11 @@ const PORT = Number(process.env.PORT) || 8080;
 
 //just to start the sever as it is hosted on render 
 const server = http.createServer((req, res) => {
+    if (req.url === "/") {
+        res.writeHead(200);
+        res.end("WS Backend is running!");
+        return;
+    }
     if (req.url === "/health") {
         res.writeHead(200);
         res.end("ok");

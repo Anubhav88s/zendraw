@@ -19,6 +19,10 @@ app.use(roomRoutes);
 
 
 // just to start the sever as it is hosted on render 
+app.get("/", (req, res) => {
+    res.send("HTTP Backend is running!");
+});
+
 app.get("/health", (req, res) => {
     res.send("ok");
 });
