@@ -14,6 +14,7 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 export default function LandingPage() {
   const isChecking = useAuthRedirect();
 
+
   if (isChecking) {
     return <div className="w-screen h-screen bg-black" />;
   }
