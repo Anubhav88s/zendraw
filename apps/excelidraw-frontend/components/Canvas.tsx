@@ -49,10 +49,23 @@ export default function Canvas({
     }
   }, [canvasRef]);
 
+  //for responsive canvas on window resize specially on mobile and tablet
+  useEffect(() => {
+  const handleResize = () => {
+    if (canvasRef.current) {
+      canvasRef.current.width = window.innerWidth;
+      canvasRef.current.height = window.innerHeight;
+      game?.clearCanvas();
+    }
+  };
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, [game]);
+
   KeyBoardShortcuts(setSelectedTool, game);
 
   return (
-    <div className="w-full h-full overflow-hidden">
+    <div className="w-full h-full overflow-hidden" style={{ touchAction: 'none' }}> {/* prevent the default touch actions like zoom and scroll on mobile and tablet*/}
       <canvas
         ref={canvasRef}
         width={window.innerWidth}

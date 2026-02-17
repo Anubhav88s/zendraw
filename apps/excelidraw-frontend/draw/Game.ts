@@ -90,6 +90,10 @@ export class Game {
     private MIN_SCALE: number = 0.1;
     private MAX_SCALE: number = 5;
     private onScaleChange?: (scale: number) => void;
+
+    //for pinch zoom (mobile and tablet touch)
+    private isPinching: boolean = false;
+    private lastPinchDist: number = 0;
     
 
     constructor(canvas : HTMLCanvasElement , roomId : string , socket : WebSocket){
@@ -106,13 +110,18 @@ export class Game {
     }
 
     destroy() {
+        //remove all event listeners
         this.canvas.removeEventListener("mousedown", this.mouseDownHandler)
-
         this.canvas.removeEventListener("mouseup", this.mouseUpHandler)
-
         this.canvas.removeEventListener("mousemove", this.mouseMoveHandler)
 
+        //for zoom in and zoom out (mouse wheel)
         this.canvas.removeEventListener("wheel", this.wheelHandler);
+
+        //for touch events (mobile and tablet)
+        this.canvas.removeEventListener("touchstart", this.touchStartHandler);
+        this.canvas.removeEventListener("touchmove", this.touchMoveHandler);
+        this.canvas.removeEventListener("touchend", this.touchEndHandler);
     }
 
     setTool(tool: "circle" | "pencil" | "rect" | "line" | "arrow" | "diamond" | "text" | "eraser" | "selection" | "pan") {
@@ -508,10 +517,18 @@ export class Game {
     }
 
     initMouseHandlers(){
+        //for mouse events
         this.canvas.addEventListener("mousedown", this.mouseDownHandler);
         this.canvas.addEventListener("mouseup", this.mouseUpHandler);
         this.canvas.addEventListener("mousemove", this.mouseMoveHandler);
+
+        //for zoom in and zoom out (mouse wheel)
         this.canvas.addEventListener("wheel", this.wheelHandler, { passive: false });
+
+        //for touch events (mobile and tablet)
+        this.canvas.addEventListener("touchstart", this.touchStartHandler, { passive: false });
+        this.canvas.addEventListener("touchmove", this.touchMoveHandler, { passive: false });
+        this.canvas.addEventListener("touchend", this.touchEndHandler, { passive: false });
     }
 
     createInput(x: number, y: number) {
@@ -722,6 +739,64 @@ export class Game {
     getScale(): number {
         return this.scale;
     }
+
+
+    // to make it responsive for mobile and tablet finger touch handling 
+
+    // Helper: get distance between two touch points
+private getPinchDistance(touches: TouchList): number {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Touch start → same as mousedown
+touchStartHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    if (e.touches.length === 2) {
+        this.isPinching = true;
+        this.lastPinchDist = this.getPinchDistance(e.touches);
+        return;
+    }
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    this.mouseDownHandler({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent);
+}
+
+// Touch move → same as mousemove + pinch-to-zoom
+touchMoveHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    if (e.touches.length === 2 && this.isPinching) {
+        const newDist = this.getPinchDistance(e.touches);
+        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const worldBefore = this.screenToWorld(midX, midY);
+        this.scale *= newDist / this.lastPinchDist;
+        this.scale = Math.min(Math.max(this.scale, this.MIN_SCALE), this.MAX_SCALE);
+        const worldAfter = this.screenToWorld(midX, midY);
+        this.panX += (worldAfter.x - worldBefore.x) * this.scale;
+        this.panY += (worldAfter.y - worldBefore.y) * this.scale;
+        this.lastPinchDist = newDist;
+        this.clearCanvas();
+        this.onScaleChange?.(this.scale);
+        return;
+    }
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    this.mouseMoveHandler({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent);
+}
+
+// Touch end → same as mouseup
+touchEndHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    if (this.isPinching) {
+        this.isPinching = false;
+        this.lastPinchDist = 0;
+        if (e.touches.length >= 1) return;
+    }
+    const touch = e.changedTouches[0];
+    this.mouseUpHandler({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent);
+}
 }
 
 

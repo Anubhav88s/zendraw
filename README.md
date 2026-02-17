@@ -64,6 +64,12 @@
 - **Zoom Indicator** — Live zoom percentage display on the canvas
 - **Infinite Canvas** — Pan freely across an unlimited workspace by clicking and dragging
 
+### 📱 Mobile & Tablet Support
+- **Touch Drawing** — Draw with finger on touch devices (all tools supported)
+- **Pinch-to-Zoom** — Two-finger pinch gesture for zooming in/out on the canvas
+- **Responsive Canvas** — Canvas auto-resizes on device rotation and window resize
+- **Touch-Optimized** — Browser scroll/zoom disabled on canvas for smooth drawing
+
 ### 👥 Real-time Collaboration
 - **Live Multi-user Drawing** — See teammates draw in real-time via WebSockets
 - **Room-based Sessions** — Create or join rooms using unique slugs
@@ -93,6 +99,7 @@
 | **Rate Limiting** | Auth routes (`/signin`, `/signup`, `/room/verify-password`) are rate-limited to **10 requests per 15 minutes** per IP using `express-rate-limit` |
 | **Helmet** | HTTP security headers (XSS protection, content sniffing prevention, clickjacking defense, HSTS) via `helmet` middleware |
 | **Password-Protected Rooms** | Room creators can set a password; joiners must verify it before accessing the canvas |
+| **Secure Password Passing** | Room passwords are passed via `sessionStorage` instead of URL query parameters, preventing exposure in browser history and server logs |
 | **WebSocket Token Verification** | WebSocket connections require a valid JWT token passed as a query parameter; unauthorized connections are immediately closed |
 | **Input Validation** | All API inputs are validated using `Zod` schemas (`CreateUserSchema`, `SigninSchema`, `CreateRoomSchema`) before processing |
 | **CORS** | Cross-Origin Resource Sharing is configured to control which origins can access the API |
@@ -205,8 +212,8 @@ draw-app/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Anubhav88s/wb.git
-   cd wb
+   git clone https://github.com/Anubhav88s/zendraw.git
+   cd zendraw
    ```
 
 2. **Install dependencies**
