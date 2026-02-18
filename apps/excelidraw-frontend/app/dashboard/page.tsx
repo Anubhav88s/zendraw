@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
-import axios from "axios";
+import { useRoomStore } from "@/store/useRoomStore";
 import Image from "next/image";
 import {
   Pencil,
@@ -19,35 +19,42 @@ import {
   EyeOff,
 } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-
-interface Room {
-  id: number;
-  slug: string;
-  createdAt: string;
-}
-
 export default function DashboardPage() {
   const router = useRouter();
   const { token, userName, logout, isAuthenticated } = useAuthStore();
-
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [newRoomName, setNewRoomName] = useState("");
-  const [newRoomPassword, setNewRoomPassword] = useState("");
-  const [showNewRoomPassword, setShowNewRoomPassword] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [deleting, setDeleting] = useState<string | null>(null);
-  const [error, setError] = useState("");
-
-  // Join room state
-  const [showJoinModal, setShowJoinModal] = useState(false);
-  const [joinSlug, setJoinSlug] = useState("");
-  const [joinPassword, setJoinPassword] = useState("");
-  const [showJoinPassword, setShowJoinPassword] = useState(false);
-  const [joinNeedsPassword, setJoinNeedsPassword] = useState(false);
-  const [joining, setJoining] = useState(false);
+  const {
+    rooms,
+    loading,
+    error,
+    showModal,
+    newRoomName,
+    newRoomPassword,
+    showNewRoomPassword,
+    creating,
+    deleting,
+    showJoinModal,
+    joinSlug,
+    joinPassword,
+    showJoinPassword,
+    joinNeedsPassword,
+    joining,
+    setError,
+    setNewRoomName,
+    setNewRoomPassword,
+    setShowModal,
+    setShowNewRoomPassword,
+    setJoinSlug,
+    setJoinPassword,
+    setShowJoinModal,
+    setShowJoinPassword,
+    setJoinNeedsPassword,
+    fetchRooms,
+    createRoom,
+    joinRoom,
+    deleteRoom,
+    resetCreateModal,
+    resetJoinModal,
+  } = useRoomStore();
 
   // Auth guard
   useEffect(() => {
@@ -57,110 +64,30 @@ export default function DashboardPage() {
   }, [isAuthenticated, router]);
 
   // Fetch rooms
-  const fetchRooms = useCallback(async () => {
-    if (!token) return;
-    try {
-      setLoading(true);
-      const res = await axios.get(`${API_URL}/rooms`, {
-        headers: { authorization: token },
-      });
-      setRooms(res.data.rooms);
-    } catch {
-      setError("Failed to load rooms");
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
-
   useEffect(() => {
-    fetchRooms();
-  }, [fetchRooms]);
+    if (token) {
+      fetchRooms(token);
+    }
+  }, [token, fetchRooms]);
 
-  // Create room
+  // Create room handler
   const handleCreateRoom = async () => {
-    if (!newRoomName.trim()) return;
-    try {
-      setCreating(true);
-      setError("");
-      const payload: { name: string; password?: string } = { name: newRoomName.trim() };
-      if (newRoomPassword.trim()) {
-        payload.password = newRoomPassword.trim();
-      }
-      const res = await axios.post(
-        `${API_URL}/room`,
-        payload,
-        { headers: { authorization: token } }
-      );
-      if (res.data.roomId) {
-        setNewRoomName("");
-        setNewRoomPassword("");
-        setShowModal(false);
-        fetchRooms();
-      }
-    } catch {
-      setError("Failed to create room. Name may already exist.");
-    } finally {
-      setCreating(false);
-    }
+    if (!token) return;
+    await createRoom(token);
   };
 
+  // Join room handler
   const handleJoinRoom = async () => {
-    if (!joinSlug.trim()) return;
-    try {
-      setJoining(true);
-      setError("");
-      const res = await axios.get(`${API_URL}/room/${joinSlug.trim()}`);
-      if (res.data.room) {
-        if (res.data.room.hasPassword && !joinNeedsPassword) {
-          // Show password input step
-          setJoinNeedsPassword(true);
-          setJoining(false);
-          return;
-        }
-        if (res.data.room.hasPassword) {
-          // Verify password
-          const verifyRes = await axios.post(`${API_URL}/room/verify-password`, {
-            slug: joinSlug.trim(),
-            password: joinPassword,
-          });
-          if (!verifyRes.data.verified) {
-            setError("Incorrect password.");
-            setJoining(false);
-            return;
-          }
-          // Pass verified password so RoomCanvas skips the second prompt
-          sessionStorage.setItem("room_pwd", joinPassword);
-          router.push(`/canvas/${joinSlug.trim()}`);
-        } else {
-          router.push(`/canvas/${joinSlug.trim()}`);
-        }
-      } else {
-        setError("Room not found. Check the slug and try again.");
-      }
-    } catch (err: any) {
-      if (err?.response?.status === 403) {
-        setError("Incorrect password.");
-      } else {
-        setError("Room not found. Check the slug and try again.");
-      }
-    } finally {
-      setJoining(false);
+    const result = await joinRoom();
+    if (result.success && result.slug) {
+      router.push(`/canvas/${result.slug}`);
     }
   };
 
-  // Delete room
+  // Delete room handler
   const handleDeleteRoom = async (slug: string) => {
-    try {
-      setDeleting(slug);
-      await axios.delete(`${API_URL}/room/${slug}`, {
-        headers: { authorization: token },
-      });
-      setRooms((prev) => prev.filter((r) => r.slug !== slug));
-    } catch {
-      setError("Failed to delete room");
-    } finally {
-      setDeleting(null);
-    }
+    if (!token) return;
+    await deleteRoom(slug, token);
   };
 
   // Logout
@@ -349,10 +276,7 @@ export default function DashboardPage() {
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => {
-              setShowModal(false);
-              setNewRoomName("");
-            }}
+            onClick={resetCreateModal}
           />
 
           {/* Modal */}
@@ -360,10 +284,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-white">Create New Room</h2>
               <button
-                onClick={() => {
-                  setShowModal(false);
-                  setNewRoomName("");
-                }}
+                onClick={resetCreateModal}
                 className="text-zinc-500 hover:text-white transition-colors p-1"
               >
                 <X className="h-5 w-5" />
@@ -418,10 +339,7 @@ export default function DashboardPage() {
 
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => {
-                  setShowModal(false);
-                  setNewRoomName("");
-                }}
+                onClick={resetCreateModal}
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 transition-all"
               >
                 Cancel
@@ -453,23 +371,13 @@ export default function DashboardPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => {
-              setShowJoinModal(false);
-              setJoinSlug("");
-              setJoinPassword("");
-              setJoinNeedsPassword(false);
-            }}
+            onClick={resetJoinModal}
           />
           <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl shadow-black/50 animate-in">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-white">Join a Room</h2>
               <button
-                onClick={() => {
-                  setShowJoinModal(false);
-                  setJoinSlug("");
-                  setJoinPassword("");
-                  setJoinNeedsPassword(false);
-                }}
+                onClick={resetJoinModal}
                 className="text-zinc-500 hover:text-white transition-colors p-1"
               >
                 <X className="h-5 w-5" />
@@ -524,12 +432,7 @@ export default function DashboardPage() {
             )}
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => {
-                  setShowJoinModal(false);
-                  setJoinSlug("");
-                  setJoinPassword("");
-                  setJoinNeedsPassword(false);
-                }}
+                onClick={resetJoinModal}
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 transition-all"
               >
                 Cancel
