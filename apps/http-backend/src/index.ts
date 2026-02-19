@@ -1,9 +1,11 @@
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import authRoutes from "./routes/auth";
 import roomRoutes from "./routes/room";
 
+dotenv.config();
 
 const app = express();  
 app.use(express.json());

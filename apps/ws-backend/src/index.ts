@@ -1,7 +1,10 @@
+import dotenv from "dotenv";
 import { WebSocketServer , WebSocket} from 'ws';
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from '@repo/backend-common/config';
 import { prismaClient } from "@repo/db/client";
+
+dotenv.config();
 
 // just to start the sever as it is hosted on render 
 import http from "http";
