@@ -9,18 +9,16 @@ dotenv.config();
 
 const app = express();  
 app.use(express.json());
-app.use(helmet({
-    crossOriginResourcePolicy: false,
-    crossOriginOpenerPolicy: false,
-})); 
+
 const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")
     .split(",")
     .map(url => url.trim());
 
+// CORS must come before helmet so preflight OPTIONS requests get CORS headers
 app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl)
-       if (!origin) return callback(null, true);
+        if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) {
             return callback(null, true);
         }
@@ -33,6 +31,11 @@ app.use(cors({
 app.options('*', cors({
     origin: allowedOrigins,
     credentials: true,
+}));
+
+app.use(helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: false,
 }));
 
 
