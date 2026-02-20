@@ -11,7 +11,7 @@ export function ZoomControls({ game, scale }: { game?: Game; scale: number }) {
   const percentage = Math.round(scale * 100);
 
   return (
-    <div className="fixed bottom-4 left-4 z-50">
+    <div className="fixed bottom-16 md:bottom-4 left-4 z-50">
       <div className="flex items-center gap-0 bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl">
         <button
           onClick={handleZoomOut}

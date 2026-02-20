@@ -21,70 +21,69 @@ export function TopBar({
   setSelectedTool: (tool: Tool) => void;
 }) {
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex gap-1 p-1.5 bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+    <div className="fixed bottom-3 left-2 right-2 md:bottom-auto md:top-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50">
+      <div className="flex gap-0.5 md:gap-1 p-1 md:p-1.5 bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl transition-all duration-300 justify-center">
         <IconButton
-          icon={<MousePointer2 />}
+          icon={<Hand size={20} />}
+          onClick={() => setSelectedTool("pan")}
+          activated={selectedTool === "pan"}
+          shortcut="0"
+        />
+        <IconButton
+          icon={<MousePointer2 size={20} />}
           onClick={() => setSelectedTool("selection")}
           activated={selectedTool === "selection"}
           shortcut="1"
         />
-        <div className="w-[1px] bg-white/10 mx-1 self-stretch" />
+        <div className="hidden md:block w-[1px] bg-white/10 mx-1 self-stretch" />
         <IconButton
-          icon={<RectangleHorizontalIcon />}
-          onClick={() => setSelectedTool("rect")}
-          activated={selectedTool === "rect"}
-          shortcut="2"
-        />
-        <IconButton
-          icon={<Diamond />}
-          onClick={() => setSelectedTool("diamond")}
-          activated={selectedTool === "diamond"}
-          shortcut="3"
-        />
-        <IconButton
-          icon={<Circle />}
-          onClick={() => setSelectedTool("circle")}
-          activated={selectedTool === "circle"}
-          shortcut="4"
-        />
-        <IconButton
-          icon={<ArrowRight />}
-          onClick={() => setSelectedTool("arrow")}
-          activated={selectedTool === "arrow"}
-          shortcut="5"
-        />
-        <IconButton
-          icon={<Minus />}
-          onClick={() => setSelectedTool("line")}
-          activated={selectedTool === "line"}
-          shortcut="6"
-        />
-        <div className="w-[1px] bg-white/10 mx-1 self-stretch" />
-        <IconButton
-          icon={<Pencil />}
+          icon={<Pencil size={20} />}
           onClick={() => setSelectedTool("pencil")}
           activated={selectedTool === "pencil"}
           shortcut="7"
         />
         <IconButton
-          icon={<Type />}
-          onClick={() => setSelectedTool("text")}
-          activated={selectedTool === "text"}
-          shortcut="8"
-        />
-        <div className="w-[1px] bg-white/10 mx-1 self-stretch" />
-        <IconButton
-          icon={<Eraser />}
+          icon={<Eraser size={20} />}
           onClick={() => setSelectedTool("eraser")}
           activated={selectedTool === "eraser"}
           shortcut="9"
         />
         <IconButton
-          icon={<Hand />}
-          onClick={() => setSelectedTool("pan")}
-          activated={selectedTool === "pan"}
-          shortcut="0"
+          icon={<RectangleHorizontalIcon size={20} />}
+          onClick={() => setSelectedTool("rect")}
+          activated={selectedTool === "rect"}
+          shortcut="2"
+        />
+        <IconButton
+          icon={<Diamond size={20} />}
+          onClick={() => setSelectedTool("diamond")}
+          activated={selectedTool === "diamond"}
+          shortcut="3"
+        />
+        <IconButton
+          icon={<Circle size={20} />}
+          onClick={() => setSelectedTool("circle")}
+          activated={selectedTool === "circle"}
+          shortcut="4"
+        />
+        <div className="hidden md:block w-[1px] bg-white/10 mx-1 self-stretch" />
+        <IconButton
+          icon={<ArrowRight size={20} />}
+          onClick={() => setSelectedTool("arrow")}
+          activated={selectedTool === "arrow"}
+          shortcut="5"
+        />
+        <IconButton
+          icon={<Minus size={20} />}
+          onClick={() => setSelectedTool("line")}
+          activated={selectedTool === "line"}
+          shortcut="6"
+        />
+        <IconButton
+          icon={<Type size={20} />}
+          onClick={() => setSelectedTool("text")}
+          activated={selectedTool === "text"}
+          shortcut="8"
         />
       </div>
     </div>

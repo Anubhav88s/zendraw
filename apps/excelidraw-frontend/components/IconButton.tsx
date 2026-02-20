@@ -17,12 +17,14 @@ export function IconButton({
             relative
             cursor-pointer 
             rounded-md 
-            p-1.5 
+            p-1 md:p-1.5
             transition-all 
             duration-200 
             ease-in-out
             backdrop-blur-sm
-            border 
+            border
+            flex-shrink-0
+            [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-5 md:[&>svg]:h-5
             ${
               activated
                 ? "bg-violet-500/20 border-violet-400 text-violet-300 shadow-lg shadow-violet-500/20"
@@ -34,7 +36,7 @@ export function IconButton({
     >
       {icon}
       {shortcut && (
-        <span className="absolute bottom-[2px] right-[2px] text-[7px] font-mono text-zinc-500 font-bold">
+        <span className="absolute bottom-[2px] right-[2px] text-[7px] font-mono text-zinc-500 font-bold hidden md:block">
           {shortcut}
         </span>
       )}
